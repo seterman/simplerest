@@ -1,3 +1,3 @@
 var router = require('express').Router();
 
-modules.exports = router;
+module.exports = router;
