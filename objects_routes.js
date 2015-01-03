@@ -21,4 +21,28 @@ router.get('/', function(req, res, next) {
     });
 });
 
+// Get a particular object
+router.get('/:uid', function(req, res, next) {
+    var objs = req.db.get('objs');
+
+    objs.findById(req.params.uid, function(err, doc) {
+        if (err) {
+            var e = new Error('Database error');
+            next(e);
+            return;
+        }
+        if (!doc) {
+            // treat no result as Not Found, so forward to the next handler
+            next();
+            return;
+        }
+
+        // Change the name of the unique identifier to match the spec
+        doc.uid = doc._id;
+        delete doc._id;
+
+        res.send(doc);
+    });
+});
+
 module.exports = router;
