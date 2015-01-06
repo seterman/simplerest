@@ -12,7 +12,6 @@ router.get('/', function(req, res, next) {
             next(e);
             return;
         }
-        console.log(req.baseUrl);
 
         var results = docs.map(function(doc) {
             return { url: req.baseUrl + '/' + doc._id };
@@ -20,6 +19,18 @@ router.get('/', function(req, res, next) {
         res.send(results);
     });
 });
+
+// Helper function that ensures an object's unique id field is named according
+// to the spec
+var ensureUid = function(obj) {
+    if (obj.hasOwnProperty('uid')) return obj;
+    if (!obj.hasOwnProperty('_id')) {
+        throw new Error('No valid id field');
+    }
+    obj.uid = obj._id;
+    delete obj._id;
+    return obj;
+};
 
 // Get a particular object
 router.get('/:uid', function(req, res, next) {
@@ -32,16 +43,35 @@ router.get('/:uid', function(req, res, next) {
             return;
         }
         if (!doc) {
-            // treat no result as Not Found, so forward to the next handler
+            // treat no result as Not Found, so forward to the next handler without
+            // specifying a different error
             next();
             return;
         }
 
         // Change the name of the unique identifier to match the spec
-        doc.uid = doc._id;
-        delete doc._id;
+        res.send(ensureUid(doc));
+    });
+});
 
-        res.send(doc);
+// Create a new object
+router.post('/', function(req, res, next) {
+    if (req.body === undefined) {
+        var e = new Error('Malformed request body');
+        next(e);
+        return;
+    }
+
+    var objs = req.db.get('objs');
+    var obj = req.body;
+    objs.insert(obj, function(err, doc) {
+        if (err) {
+            var e = new Error('Database error');
+            next(e);
+            return;
+        }
+
+        res.send(ensureUid(doc));
     });
 });
 
