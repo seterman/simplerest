@@ -102,4 +102,17 @@ router.put('/:uid', function(req, res, next) {
     });
 });
 
+// Delete an object
+router.delete('/:uid', function(req, res, next) {
+    var objs = req.db.get('objs');
+    objs.remove({ _id: req.params.uid }, function(err) {
+        if (err) {
+            var e = new Error('Database error');
+            next(e);
+            return;
+        }
+        res.send();
+    });
+});
+
 module.exports = router;
