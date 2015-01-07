@@ -37,15 +37,16 @@ router.get('/:uid', function(req, res, next) {
     var objs = req.db.get('objs');
 
     objs.findById(req.params.uid, function(err, doc) {
+        var e;
         if (err) {
-            var e = new Error('Database error');
+            e = new Error('Database error');
             next(e);
             return;
         }
+        // The requested object was not found
         if (!doc) {
-            // treat no result as Not Found, so forward to the next handler without
-            // specifying a different error
-            next();
+            e = new Error('Invalid object identifier');
+            next(e);
             return;
         }
 
@@ -63,10 +64,36 @@ router.post('/', function(req, res, next) {
     }
 
     var objs = req.db.get('objs');
-    var obj = req.body;
-    objs.insert(obj, function(err, doc) {
+    objs.insert(req.body, function(err, doc) {
         if (err) {
             var e = new Error('Database error');
+            next(e);
+            return;
+        }
+
+        res.send(ensureUid(doc));
+    });
+});
+
+// Update an existing object
+router.put('/:uid', function(req, res, next) {
+    if (req.body === undefined) {
+        var e = new Error('Malformed request body');
+        next(e);
+        return;
+    }
+
+    var objs = req.db.get('objs');
+    objs.findAndModify({ _id: req.params.uid }, req.body, function(err, doc) {
+        var e;
+        if (err) {
+            e = new Error('Database error');
+            next(e);
+            return;
+        }
+        // The requested object was not found
+        if (!doc) {
+            e = new Error('Invalid object identifier');
             next(e);
             return;
         }
