@@ -2,9 +2,8 @@ var monk = require('monk');
 var request = require('supertest');
 var should = require('should');
 
-// TODO: figure out how to switch databases so that the tests do not
-// use the same database as the app
-var connection_string = 'localhost/simplerest';
+// Use a test database to avoid overwriting any existing application data
+var connection_string = 'localhost/simpleresttest';
 var testUrl = 'http://localhost:8080/api/objects';
 
 describe('Objects', function() {
