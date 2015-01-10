@@ -2,22 +2,24 @@ var monk = require('monk');
 var request = require('supertest');
 var should = require('should');
 
+// TODO: figure out how to switch databases so that the tests do not
+// use the same database as the app
 var connection_string = 'localhost/simplerest';
 var testUrl = 'http://localhost:8080/api/objects';
-var db;
 
 describe('Objects', function() {
     // This was a randomly generated id, hardcode it for easy testing
     var testId = '54b19207ff487e8061d46636';
+    var db;
 
     before(function(done) {
-        testdb = monk(connection_string);
+        db = monk(connection_string);
         done();
     });
 
     // Clear the database and insert a dummy object to test against
     beforeEach(function(done) {
-        var objs = testdb.get('objs');
+        var objs = db.get('objs');
         objs.remove({}, function(err) {
             if (err) {
                 done(err);
@@ -29,7 +31,7 @@ describe('Objects', function() {
     });
 
     after(function(done) {
-        testdb.close();
+        db.close();
         done();
     });
 
@@ -40,8 +42,8 @@ describe('Objects', function() {
                 "1": "foo",
                 "2": "bar",
                 "3": "baz"
-            }).expect(200)
-            .expect(function(res) {
+            }).expect(200) // check the status code
+            .expect(function(res) { // check the response body
                 res.body.should.have.properties({
                     "1": "foo",
                     "2": "bar",
@@ -79,6 +81,7 @@ describe('Objects', function() {
             .expect(200)
             .expect(function(res) {
                 res.body.should.have.length(1);
+                // Since the length is 1, res.body[0] will always exist
                 res.body[0].should.have.property('url');
                 res.body[0].url.should.equal(testUrl + '/' + testId);
             }).end(done);
@@ -97,6 +100,8 @@ describe('Objects', function() {
             }).end(done);
     });
 
+    // This is not an incredibly helpful test, but DELETE returns nothing
+    // so there is no response to check.
     it('DELETE /:uid should work', function(done) {
         request(testUrl)
             .delete('/' + testId)
@@ -109,6 +114,7 @@ describe('Objects', function() {
             .get('/xxx')
             .expect(200)
             .expect(function(res) {
+                // Make sure the error is to spec
                 res.body.should.have.properties({
                     'verb': 'GET',
                     'url': testUrl + '/xxx'

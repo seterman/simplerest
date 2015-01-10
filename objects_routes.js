@@ -1,6 +1,8 @@
 var router = require('express').Router();
 
 // The database is accessible through req.db, which was pre-seeded in server.js
+// For a larger app, these routes would be in routes/objects, but since this is a very
+// simple API, an extra folder seems excessive.
 
 // Get a list of uids for all objects
 router.get('/', function(req, res, next) {
@@ -13,6 +15,7 @@ router.get('/', function(req, res, next) {
             return;
         }
 
+        // Change the list of full JSON objects to a list of urls
         var results = docs.map(function(doc) {
             var fullUrl = req.protocol + '://' + req.get('host') + req.baseUrl + '/' + doc._id;
             return { url: fullUrl };

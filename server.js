@@ -49,6 +49,7 @@ app.use(function(err, req, res, next) {
     });
 });
 
+// Start the server
 var port = process.env.OPENSHIFT_NODEJS_PORT || 8080;
 var ip = process.env.OPENSHIFT_NODEJS_IP || '127.0.0.1';
 console.log('Server listening on port', port);
