@@ -23,5 +23,11 @@
     "monk": "*"
   },
 
+  "devDependencies": {
+    "mocha": "*",
+    "should": "*",
+    "supertest": "*"
+  },
+
   "main": "server.js"
 }
