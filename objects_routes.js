@@ -14,7 +14,8 @@ router.get('/', function(req, res, next) {
         }
 
         var results = docs.map(function(doc) {
-            return { url: req.baseUrl + '/' + doc._id };
+            var fullUrl = req.protocol + '://' + req.get('host') + req.baseUrl + '/' + doc._id;
+            return { url: fullUrl };
         });
         res.send(results);
     });
@@ -84,7 +85,7 @@ router.put('/:uid', function(req, res, next) {
     }
 
     var objs = req.db.get('objs');
-    objs.findAndModify({ _id: req.params.uid }, req.body, function(err, doc) {
+    objs.findAndModify({ _id: req.params.uid }, req.body, { new: true }, function(err, doc) {
         var e;
         if (err) {
             e = new Error('Database error');
@@ -97,7 +98,6 @@ router.put('/:uid', function(req, res, next) {
             next(e);
             return;
         }
-
         res.send(ensureUid(doc));
     });
 });
